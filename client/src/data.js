@@ -27,18 +27,21 @@ export const categories = [
         id: 1,
         img:"https://i.ibb.co/DwVznGn/hazte-premium-descarga-alta-resolucion-designed-with-EDIT-org-8.jpg",
         title: "SPORTSWEAR T-SHIRTS",
+        cat: "sportswear t-shirts"
         
     },
     {
         id: 2,
         img:"https://i.ibb.co/QFg9Fcr/hazte-premium-descarga-alta-resolucion-designed-with-EDIT-org-9.jpg",
         title: "SHIRTS",
+        cat: "shirts"
        
     },
     {
         id: 3,
         img:"https://i.ibb.co/KsMH6Qz/hazte-premium-descarga-alta-resolucion-designed-with-EDIT-org-5.jpg",
         title: "SHOES",
+        cat: "shoes"
         
     }
 ]
