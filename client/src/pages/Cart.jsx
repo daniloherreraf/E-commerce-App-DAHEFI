@@ -1,10 +1,16 @@
 import { Add, Remove } from '@material-ui/icons'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Announcement from '../components/Announcement'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { mobile } from '../responsive'
+import { useSelector } from "react-redux"
+import StripeCheckout from "react-stripe-checkout"
+import { userRequest } from '../requestMethods'
+import { useHistory } from "react-router";
+
+const KEY = process.env.REACT_APP_STRIPE;
 
 const Container = styled.div`
 
@@ -136,14 +142,15 @@ const Summary = styled.div`
 
 const SummaryTitle = styled.h1`
     font-weight: 200;
-    display: flex;
-    justify-content: space-between;
-    font-weight: ${props=>props.type === "total" && "500"};
-    font-size: ${props=>props.type === "total" && "24px"};
+   
 `
 
 const SummaryItem = styled.div`
     margin: 30px 0px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: ${props=>props.type === "total" && "500"};
+    font-size: ${props=>props.type === "total" && "24px"};
 `
 
 const SummaryItemText = styled.span`
@@ -165,6 +172,29 @@ const Button = styled.button`
 
 
 const Cart = () => {
+    const cart = useSelector((state)=> state.cart);
+    const [stripeToken, setStripeToken] = useState(null)
+    const history = useHistory()
+
+    const onToken = (token) =>{
+        setStripeToken(token);
+    };
+
+   useEffect(() => {
+    const makeRequest = async () =>{
+        try {
+            const res = await userRequest.post("/checkout/payment", {
+                tokenId: stripeToken.id,
+                amount: 500,  
+            });
+            history.push("/success",{ data: res.data })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    stripeToken && makeRequest();
+   }, [stripeToken, cart.total, history])
+
   return (
    <Container>
     <Navbar/>
@@ -182,51 +212,42 @@ const Cart = () => {
         <Bottom>
 
             <Info>
+               {cart.products.map((product)=> (
                 <Product>
                     <ProductDetail>
-                        <Image src="https://http2.mlstatic.com/D_NQ_NP_957223-CBT52958400604_122022-W.jpg"/>
+                        <Image src={product.img}/>
                         <Details>
-                            <ProductName><b>Product:</b> SHIRT</ProductName>
-                            <ProductId><b>ID:</b> 9387546211</ProductId>
-                            <ProductColor color="LightBlue"/>
-                            <ProductSize><b>Size: </b>XL</ProductSize>
+                            <ProductName>
+                                <b>Product:</b> {product.title}
+                            </ProductName>
+                            <ProductId>
+                                <b>ID:</b> {product._id}
+                            </ProductId>
+                            <ProductColor color={product.color}/>
+                            <ProductSize>
+                                <b>Size: </b> {product.size}
+                            </ProductSize>
                         </Details>
                     </ProductDetail>
                     <PriceDetail>
                         <ProductAmountContainer>
                             <Add/>
-                            <ProductAmount>2</ProductAmount>
+                            <ProductAmount>{product.quantity}</ProductAmount>
                             <Remove/>
                         </ProductAmountContainer>
-                        <ProductPrice>$ 30</ProductPrice>
+                        <ProductPrice>
+                            $ {product.price * product.quantity}
+                        </ProductPrice>
                     </PriceDetail>
                 </Product>
+                ))}
                 <Hr/>
-                <Product>
-                    <ProductDetail>
-                        <Image src="https://colombia.com.co/wp-content/uploads/2020/05/6777-9455OV-3-270x320.jpg"/>
-                        <Details>
-                            <ProductName><b>Product:</b> SHOES-ES</ProductName>
-                            <ProductId><b>ID:</b> 7546211</ProductId>
-                            <ProductColor color="Black"/>
-                            <ProductSize><b>Size: </b>41</ProductSize>
-                        </Details>
-                    </ProductDetail>
-                    <PriceDetail>
-                        <ProductAmountContainer>
-                            <Add/>
-                            <ProductAmount>1</ProductAmount>
-                            <Remove/>
-                        </ProductAmountContainer>
-                        <ProductPrice>$ 45</ProductPrice>
-                    </PriceDetail>
-                </Product>
             </Info>
             <Summary>
                 <SummaryTitle>ORDER SUMMARY</SummaryTitle>
                 <SummaryItem>
                     <SummaryItemText>Subtotal</SummaryItemText>
-                    <SummaryItemPrice>$ 80</SummaryItemPrice>
+                    <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
                 </SummaryItem>
                 <SummaryItem>
                     <SummaryItemText>Estimated Shipping</SummaryItemText>
@@ -238,9 +259,21 @@ const Cart = () => {
                 </SummaryItem>
                 <SummaryItem type="total">
                     <SummaryItemText >Total</SummaryItemText>
-                    <SummaryItemPrice>$ </SummaryItemPrice>
+                    <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
                 </SummaryItem>
+                <StripeCheckout
+                name="DAHEFI."
+                image=""
+                billingAddress
+                shippingAddress
+                description={`Your total is $${cart.total}`}
+                amount={cart.total * 100}
+                token={onToken}
+                stripeKey={KEY}
+            >
                 <Button>CHECKOUT NOW</Button>
+            </StripeCheckout>
+                
             </Summary>
         </Bottom>
     </Wrapper>

@@ -65,7 +65,7 @@ const ProductList = () => {
    <Container>
         <Navbar/>
         <Announcement/>
-        <Title>Dresses</Title>
+        <Title>{cat}</Title>
         <FilterContainer>
             <Filter>
                 <FilterText>Filter Products:</FilterText>
@@ -90,10 +90,8 @@ const ProductList = () => {
                     <Option>L</Option>
                     <Option>XL</Option>
                     <Option>XXL</Option>
-                </Select>
-                <Select name="footsize" onChange={handleFilters}>
                     <Option disabled>
-                        Foot Size
+                       Foot Size
                     </Option>
                     <Option>37</Option>
                     <Option>38</Option>
